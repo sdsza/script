@@ -1,0 +1,113 @@
+function doPost(e) {
+    
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName("เมนู");
+  
+    var data = JSON.parse(e.postData.contents)
+    var userMsg = data.originalDetectIntentRequest.payload.data.message.text;
+    var values = sheet.getDataRange().getValues();
+
+    var info = values.find(function seek(row) {
+        return row[0] == userMsg;
+    });
+
+    sheet = ss.getSheetByName(info[1]);
+    values = sheet.getDataRange().getDisplayValues()
+
+    info = values.find(function seek(row) {
+        return row[0] == userMsg;
+    });
+
+    Logger.log(info);
+
+    var Data1 = info[1]; //ชื่อ สกุล
+    var Data2 = info[2]; //คะแนนเก็บ
+    var Data3 = info[3]; //กลางภาค
+    var Data4 = info[4]; //ปลายภาค
+    var Data5 = info[5]; //เกรด
+    var Data6 = info[6]; //เกรดเฉลี่ย
+    var Data7 = info[7]; //รูปภาพ
+
+    var result = {
+        "fulfillmentMessages": [{
+            "platform": "line",
+            "type": 4,
+            "payload": {
+                "line": {
+                    "type": "flex",
+                    "altText": "this is a flex message",
+                    "contents": {
+                        "type": "bubble",
+                        "size": "giga",
+                        "hero": {
+                            "type": "image",
+                            "url": Data7,
+                            "size": "full",
+                            "aspectRatio": "1.51:1",
+                            "aspectMode": "fit"
+                        },
+
+                        "body": {
+                            "type": "box",
+                            "layout": "vertical",
+                            "contents": [
+
+                                {
+                                    "type": "text",
+                                    "text": ":: สรุปผลการเรียน ::",
+                                    "weight": "bold",
+                                    "align": "center",
+                                    "color": "#0000ff"
+                                },
+
+                                {
+                                    "type": "text",
+                                    "text": Data1,
+                                    "weight": "bold",
+                                    "size": "xl",
+                                    "align": "center",
+                                    "color": "#ff0000"
+                                },
+                                {
+                                    "type": "text",
+                                    "text": "คะแนนเก็บ : " + Data2 + " คะแนน"
+                                },
+                                {
+                                    "type": "text",
+                                    "text": "สอบกลางภาค : " + Data3 + " คะแนน"
+                                },
+                                {
+                                    "type": "text",
+                                    "text": "สอบปลายภาค : " + Data4 + " คะแนน"
+                                },
+                                {
+                                    "type": "text",
+                                    "text": "เกรด : " + Data5,
+                                    "size": "xl",
+                                    "weight": "bold",
+                                    "align": "center",
+                                    "color": "#32CD32"
+                                },
+                                {
+                                    "type": "text",
+                                    "text": "เกรดเฉลี่ย : " + Data6
+                                },
+                                {
+                                    "type": "text",
+                                    "text": "ครูผู้สอน: นายอภิวัฒน์  วงศ์กัณหา"
+                                }
+
+                            ]
+                        }
+                    }
+                }
+
+            }
+        }]
+    }
+    Logger.log(JSON.stringify(result));
+    var replyJSON = ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+
+    return replyJSON;
+
+}
